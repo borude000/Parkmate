@@ -1,0 +1,151 @@
+
+.navbar-nav .nav-item .nav-link:hover {
+  color: green !important;
+}
+
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.steps-container {
+  display: flex;
+  flex-direction: column; /* Stack the steps vertically */
+  width: 100%; /* Ensure full width */
+  align-items: center; /* Center align the steps if needed */
+}
+
+.step {
+  background-color: #e0ffe0;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+  width: 30%; /* Make each step take full width */
+  max-width: 800px; /* Optional: Limit the maximum width */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step:hover {
+  transform: scale(1.30);
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.step h2 {
+  color: #28a745;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.step p {
+  font-size: 1.25rem;
+}
+
+.zone-number {
+  background-color: #000;
+  color: #fff;
+  padding: 10px;
+  font-size: 1.5rem;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.time-options, .vehicle-options {
+  font-size: 1rem;
+  color: #333;
+}
+
+.vehicle-options span, .time-options span {
+  margin: 0 10px;
+}
+
+.reserve-link {
+  color: #28a745;
+  margin-top: 20px;
+  display: inline-block;
+}
+
+.reserve-link:hover {
+  text-decoration: underline;
+}
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 400px; /* You can adjust the height according to your needs */
+  overflow: hidden;
+}
+
+.video-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.text-white {
+  z-index: 2;
+}
+
+.video-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 70%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4); /* Optional: Add a dark overlay */
+  border-radius: 50px;
+  
+}
+.input-group input {
+  background-color: #f8f9fa;
+  border: none;
+}
+
+.input-group button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+}
+
+.input-group input:focus,
+.input-group button:focus {
+  box-shadow: none;
+}

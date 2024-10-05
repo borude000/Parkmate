@@ -1,0 +1,91 @@
+import React, { useEffect, useRef } from 'react';
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
+
+const marks = [
+  { value: 0, label: '0 min' },
+  { value: 20, label: '20 min' },
+  { value: 37, label: '40 min' },
+  { value: 100, label: '100 min' },
+];
+
+function valuetext(value: Number) {
+  return `${value}°C`;
+}
+
+const Page2 = () => {
+  const sectionsRef = useRef([]);
+
+  useEffect(() => {
+    const sections = sectionsRef.current;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('scale-in'); // Apply the scale-in effect
+        }
+      });
+    });
+
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+
+    return () => {
+      sections.forEach(section => {
+        observer.unobserve(section);
+      });
+    };
+  }, []);
+
+  return (
+    <div className="container my-5">
+      <div className="row">
+        <div className="col-12 text-center">
+          <h1>The smarter way to park</h1>
+          <p>ParkMobile puts the power to park in your hands. Whether you're looking for a spot now or reserving a spot for later, ParkMobile has you covered.</p>
+          <br />
+        </div>
+
+        <div className="col-12 mt-4">
+          <div className="steps-container">
+            <div ref={(el) => (sectionsRef.current[0] = el)} className="step step-1 section">
+              <h2>1</h2>
+              <p>Enter your zone number</p>
+              <div className="search-bar input-group mb-5" style={{ maxWidth: '400px', margin: '2rem auto 0 auto' }}>
+                <select className="form-select" aria-label="Select Location">
+                  <option selected>Select a location</option>
+                  <option value="1">Location 1</option>
+                  <option value="2">Location 2</option>
+                  <option value="3">Location 3</option>
+                  <option value="4">Location 4</option>
+                </select>
+              </div>
+            </div>
+
+            <div ref={(el) => (sectionsRef.current[1] = el)} className="step step-2 section">
+              <h2>2</h2>
+              <p>Set your time</p>
+            </div>
+
+            <div ref={(el) => (sectionsRef.current[2] = el)} className="step step-3 section">
+              <h2>3</h2>
+              <p>Select your vehicle</p>
+              <div className="vehicle-options">
+                <span>NY: 678CMD</span> | <span>GA: 8109FT</span>
+              </div>
+            </div>
+
+            <div ref={(el) => (sectionsRef.current[3] = el)} className="step step-4 section">
+              <h2>4</h2>
+              <p>Pay & go</p>
+              <button className="btn btn-dark">Start Parking</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Page2;
