@@ -1,15 +1,17 @@
 import React from 'react';
 import { Link } from 'react-scroll';
 
+
+
 const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
       <div className="container-fluid">
         {/* Logo */}
-        <a className="navbar-brand" href="#">
+        <a className="navbar-brand" href='/' >
           <img src="/logo.png" alt="ParkMate Logo" style={{ height: '50px' }} />
         </a>
-        <a className="fw-bold text-dark fs-4" href="#">ParkMate</a>
+        <a className="fw-bold text-dark fs-4" href="/">ParkMate</a>
         
         {/* Toggler for Mobile Menu */}
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,11 +32,9 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">Reserve parking for later</a>
+              <a className="nav-link" href="/">Home</a>
             </li>
-            <li className="nav-item">
-              <a className="nav-link" href="#">ParkMate for Business</a>
-            </li>
+            
             <li className="nav-item">
               <a className="nav-link" href="#">Solutions for parking providers</a>
             </li>

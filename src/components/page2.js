@@ -1,17 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import Box from '@mui/material/Box';
-import Slider from '@mui/material/Slider';
-
-const marks = [
-  { value: 0, label: '0 min' },
-  { value: 20, label: '20 min' },
-  { value: 37, label: '40 min' },
-  { value: 100, label: '100 min' },
-];
-
-function valuetext(value: Number) {
-  return `${value}°C`;
-}
 
 const Page2 = () => {
   const sectionsRef = useRef([]);
@@ -28,12 +15,12 @@ const Page2 = () => {
     });
 
     sections.forEach(section => {
-      observer.observe(section);
+      if (section) observer.observe(section); // Check if section exists
     });
 
     return () => {
       sections.forEach(section => {
-        observer.unobserve(section);
+        if (section) observer.unobserve(section); // Check before unobserving
       });
     };
   }, []);
@@ -54,7 +41,7 @@ const Page2 = () => {
               <p>Enter your zone number</p>
               <div className="search-bar input-group mb-5" style={{ maxWidth: '400px', margin: '2rem auto 0 auto' }}>
                 <select className="form-select" aria-label="Select Location">
-                  <option selected>Select a location</option>
+                  <option defaultValue>Select a location</option>
                   <option value="1">Location 1</option>
                   <option value="2">Location 2</option>
                   <option value="3">Location 3</option>

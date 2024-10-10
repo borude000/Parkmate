@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 
 const HeroSection = () => {
   return (
@@ -37,7 +38,10 @@ const HeroSection = () => {
           </select>
         </div>
         <div className="mt-4">
-          <a href="#" className="btn btn-success">Get the mobile app</a>
+          <Link to="/login" className="btn btn-success">Login</Link> {/* Change this to Link */}
+        </div>
+        <div className="mt-4">
+          <Link to="/register" className="btn btn-success">Register</Link> {/* Change this to Link */}
         </div>
       </div>
     </div>
