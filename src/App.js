@@ -6,9 +6,11 @@ import Footer from './components/Footer';
 import Page2 from './components/page2';
 import Page3 from './components/page3';
 import ReadytoPark from './components/Readytopark';
-import Login from './components/Login';  // Import login component
-import Register from './components/Register';  // Import registration component
-import './App.css';
+import Login from './components/Login';  
+import Register from './components/Register';  
+import Profile from './components/Profile'; 
+import './App.css'; 
+import Parking from './components/Parking';
 
 function App() {
   return (
@@ -21,13 +23,20 @@ function App() {
             <Page2 />
             <Page3 />
             <ReadytoPark />
+            
+            
           </>
         } />
         <Route path="/login" element={<Login />} />  
         <Route path="/register" element={<Register />} />  
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/Parking" element={<Parking />} />
       </Routes>
       <Footer />
     </Router>
+    
+    
+    
   );
 }
 

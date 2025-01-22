@@ -31,15 +31,7 @@ function App() {
           <p>
             ParkMate is making parking easier in over locations across Citys.
           </p>
-          <div className="search-bar input-group mb-5" style={{ maxWidth: '400px', margin: '2rem auto 0 auto' }}>
-            <select className="form-select" aria-label="Select Location">
-              <option selected>Select a location</option>
-              <option value="1">Pune</option>
-              <option value="2">Ahmednagar</option>
-              <option value="3">Other</option>
-              <option value="4">coming Soon..</option>
-            </select>
-          </div>
+          
         </div>
         <div className="col-md-4">
           <h4>Popular Citys</h4>

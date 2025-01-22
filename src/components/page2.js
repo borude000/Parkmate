@@ -26,11 +26,11 @@ const Page2 = () => {
   }, []);
 
   return (
-    <div className="container my-5">
+    <div id="page2" className="container my-5">
       <div className="row">
         <div className="col-12 text-center">
           <h1>The smarter way to park</h1>
-          <p>ParkMobile puts the power to park in your hands. Whether you're looking for a spot now or reserving a spot for later, ParkMobile has you covered.</p>
+          <p>.</p>
           <br />
         </div>
 
@@ -40,26 +40,21 @@ const Page2 = () => {
               <h2>1</h2>
               <p>Enter your zone number</p>
               <div className="search-bar input-group mb-5" style={{ maxWidth: '400px', margin: '2rem auto 0 auto' }}>
-                <select className="form-select" aria-label="Select Location">
-                  <option defaultValue>Select a location</option>
-                  <option value="1">Location 1</option>
-                  <option value="2">Location 2</option>
-                  <option value="3">Location 3</option>
-                  <option value="4">Location 4</option>
-                </select>
+                
               </div>
             </div>
 
             <div ref={(el) => (sectionsRef.current[1] = el)} className="step step-2 section">
               <h2>2</h2>
               <p>Set your time</p>
+              
             </div>
 
             <div ref={(el) => (sectionsRef.current[2] = el)} className="step step-3 section">
               <h2>3</h2>
               <p>Select your vehicle</p>
               <div className="vehicle-options">
-                <span>NY: 678CMD</span> | <span>GA: 8109FT</span>
+                
               </div>
             </div>
 
