@@ -3,14 +3,13 @@ import { Link } from 'react-scroll';
 import axios from 'axios';
 
 const Navbar = () => {
-  const [user, setUser] = useState(null); // To store user profile data
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // To track if user is logged in
+  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
       setIsLoggedIn(true);
-      // Fetch user profile data using the token
       axios
         .get('http://localhost:5000/api/auth/profile', {
           headers: {
@@ -24,23 +23,24 @@ const Navbar = () => {
           console.error('Error fetching profile data', error);
         });
     }
-  }, [isLoggedIn]); // Re-fetch when the user logs in
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     setIsLoggedIn(false);
     setUser(null);
+    window.location.reload();
   };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
       <div className="container-fluid">
         {/* Logo */}
-        <a className="navbar-brand" href="/">
+        <a className="navbar-brand d-flex align-items-center" href="/" style={{ gap: '10px' }}>
           <img src="/logo.png" alt="ParkMate Logo" style={{ height: '50px' }} />
+          <span className="fw-bold text-dark fs-4">ParkMate</span>
         </a>
-        <a className="fw-bold text-dark fs-4" href="/">ParkMate</a>
-        
+
         {/* Toggler for Mobile Menu */}
         <button
           className="navbar-toggler"
@@ -61,18 +61,17 @@ const Navbar = () => {
               <a className="nav-link" href="/">Home</a>
             </li>
             <li className="nav-item">
-              <Link
-                className="nav-link nav-link-hover"
-                to="page2"
-                smooth={true}
-                duration={500}
-              >
+              <Link className="nav-link nav-link-hover" to="page2" smooth={true} duration={500}>
                 Ready to park now
               </Link>
             </li>
             <li className="nav-item">
+              <a className="nav-link" href="/Orders">Orders</a>
+            </li>
+            <li className="nav-item">
               <a className="nav-link" href="#">Solutions for parking providers</a>
             </li>
+
             {/* Profile Dropdown */}
             <li className="nav-item dropdown">
               <a
@@ -82,25 +81,75 @@ const Navbar = () => {
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '8px 15px',
+                  borderRadius: '25px',
+                  background: '#f1f1f1',
+                  transition: 'background 0.3s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#e0e0e0')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#f1f1f1')}
               >
                 <img
-                  src="/profile.png" // Replace with the path to your profile icon
+                  src="/profile.png"
                   alt="Profile"
-                  style={{ width: '30px', height: '30px', borderRadius: '50%' }}
+                  style={{ width: '35px', height: '35px', borderRadius: '50%', objectFit: 'cover' }}
                 />
+                <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#333' }}>
+                  {isLoggedIn ? user?.name : 'Guest'}
+                </span>
               </a>
-              <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+              <ul
+                className="dropdown-menu dropdown-menu-end"
+                aria-labelledby="profileDropdown"
+                style={{
+                  minWidth: '220px',
+                  borderRadius: '10px',
+                  boxShadow: '0px 4px 8px rgba(0,0,0,0.1)',
+                  border: 'none',
+                  overflow: 'hidden',
+                }}
+              >
                 {isLoggedIn ? (
                   <>
-                    <li><span className="dropdown-item">Name= {user?.name}</span></li>
-                    <li><span className="dropdown-item">Email= {user?.email}</span></li>
-                    <li><span className="dropdown-item">{user?.mobile}</span></li>
-                    <li><a className="dropdown-item text-danger" onClick={handleLogout}>Logout</a></li>
+                    <li className="dropdown-item" style={{ padding: '12px 15px', fontSize: '14px' }}>
+                      <strong>Name:</strong> {user?.name}
+                    </li>
+                    <li className="dropdown-item" style={{ padding: '12px 15px', fontSize: '14px' }}>
+                      <strong>Email:</strong> {user?.email}
+                    </li>
+                    <li>
+                      <a
+                        className="dropdown-item text-danger"
+                        onClick={handleLogout}
+                        style={{
+                          padding: '12px 15px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          transition: 'background 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = '#f8d7da')}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        Logout
+                      </a>
+                    </li>
                   </>
                 ) : (
                   <>
-                    <li><a className="dropdown-item" href="/login">Login</a></li>
-                    <li><a className="dropdown-item" href="/register">Sign Up</a></li>
+                    <li>
+                      <a className="dropdown-item" href="/login" style={{ padding: '12px 15px' }}>
+                        Login
+                      </a>
+                    </li>
+                    <li>
+                      <a className="dropdown-item" href="/register" style={{ padding: '12px 15px' }}>
+                        Sign Up
+                      </a>
+                    </li>
                   </>
                 )}
               </ul>

@@ -1,0 +1,52 @@
+/* Orders Page Styling */
+.orders-container {
+    max-width: 800px;
+    margin: auto;
+  }
+  
+  .order-card {
+    border-radius: 12px;
+    background: #f9f9f9;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon {
+    color: #28a745;
+    margin-right: 8px;
+  }
+  
+  .order-history-item {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .order-history-item:hover {
+    background: #e9ecef;
+  }
+  
+  .expanded-order {
+    background: #ffffff;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  .expanded-order p {
+    margin: 5px 0;
+  }
+  
+  .list-group-item {
+    transition: background-color 0.3s ease-in-out;
+  }
+  

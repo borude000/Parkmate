@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap is included
 import './Login.css'; // Your custom styling
 
 const Login = () => {
@@ -8,6 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(''); // State for success message
   const navigate = useNavigate(); // Initialize the navigate hook
 
   // Handle form submission
@@ -15,51 +17,43 @@ const Login = () => {
     e.preventDefault(); // Prevent form reload on submit
 
     try {
-      // Axios POST request to your backend API
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
-        email,
-        password,
-      });
+        // Axios POST request to your backend API
+        const response = await axios.post('http://localhost:5000/api/auth/login', {
+            email,
+            password,
+        });
 
-      // If login is successful, handle the response
-      console.log('Login successful:', response.data);
+        // If login is successful, handle the response
+        console.log('Login successful:', response.data);
 
-      // Display a success alert
-      alert('Login successful!'); // Popup alert after successful login
+        // Save the token and userId to localStorage
+        localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('userId', response.data.user._id);  // ✅ Store userId
 
-      // Save the token to localStorage
-      localStorage.setItem('authToken', response.data.token);
-      
-      navigate('/')
+        // Set success message
+        setSuccess('Login successful! Redirecting...');
 
-      // Trigger page refresh to fetch updated profile info
-      window.location.reload(); // Reload the page to update the profile data
-      
+        // Delay for 2 seconds, then navigate and refresh the page
+        setTimeout(() => {
+            navigate('/');
+            window.location.reload(); // Reload to fetch updated profile data
+        }, 2000);
 
-      // Optionally, navigate to home page (if you don't rely on the page refresh)
-      // navigate('/'); // Change '/' to your desired route if you prefer navigation over refresh
     } catch (err) {
-      // Handle login error
-      console.error('Error during login:', err.response ? err.response.data : err);
-      setError('Invalid email or password. Please try again.');
+        // Handle login error
+        console.error('Error during login:', err.response ? err.response.data : err);
+        setError('Invalid email or password. Please try again.');
     }
-  };
+};
 
   return (
     <div className="login-container d-flex justify-content-center align-items-center">
       <div className="login-box">
         <div className="login-logo">
-          {/* Add your ParkMate logo here */}
           <img src="/logo.png" alt="ParkMate" />
         </div>
         <h3 className="text-center">Welcome back</h3>
         <p className="text-center">Please enter your details to sign in.</p>
-        <div className="login-options d-flex justify-content-center">
-          <button className="login-btn google-btn">
-            <img src="/google.png" alt="Google logo" className="btn-icon" /> Google
-          </button>
-        </div>
-        <p className="text-center">OR</p>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -86,12 +80,24 @@ const Login = () => {
               <input type="checkbox" id="rememberMe" />
               <label htmlFor="rememberMe"> Remember me</label>
             </div>
-            <a href="#" className="forgot-password">Forgot password?</a>
           </div>
           <button type="submit" className="btn btn-success btn-block login-submit">Sign in</button>
-          {/* Display error message if login fails */}
-          {error && <p className="text-danger text-center">{error}</p>}
         </form>
+
+        {/* Bootstrap Alert for Success */}
+        {success && (
+          <div className="alert alert-success text-center mt-3" role="alert">
+            {success}
+          </div>
+        )}
+
+        {/* Bootstrap Alert for Error */}
+        {error && (
+          <div className="alert alert-danger text-center mt-3" role="alert">
+            {error}
+          </div>
+        )}
+
         <p className="text-center mt-3">
           Don’t have an account yet? <a href="/register">Sign Up</a>
         </p>

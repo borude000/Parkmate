@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const ParkingServicePage = () => {
   const [selectedLocation, setSelectedLocation] = useState('');
@@ -8,48 +10,77 @@ const ParkingServicePage = () => {
   const [showParkingArea, setShowParkingArea] = useState(false);
   const [date, setDate] = useState('');
   const [time, setTime] = useState({ start: '', end: '' });
-  const [step, setStep] = useState(1); // Track the current step
+  const [step, setStep] = useState(1);
   const [cost, setCost] = useState(null);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState('');
+  const navigate = useNavigate();
+
 
   const locations = {
-    'Location 1': ['Area 1', 'Area 2'],
+    'Samarth Parking ': ['Samarth Parking 1', 'Samarth Parking 2'],
     'Location 2': ['Area 3', 'Area 4']
   };
 
+  // Dynamically load Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => console.log('Razorpay script loaded');
+    document.body.appendChild(script);
+
+    // Cleanup the script on component unmount
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  useEffect(() => {
+    calculateCost(); // Recalculate cost whenever time or date changes
+  }, [date, time, selectedVehicle]);
+
   const calculateCost = () => {
-    if (!time.start || !time.end) return;
-  
+    if (!time.start || !time.end || !date) {
+      setCost(null);
+      return;
+    }
+
     const startTime = new Date(`${date}T${time.start}`);
     const endTime = new Date(`${date}T${time.end}`);
+
+    if (endTime <= startTime) {
+      setCost('Invalid time selection');
+      return;
+    }
+
     const durationInHours = (endTime - startTime) / (1000 * 60 * 60);
-  
     let calculatedCost = 0;
-  
+
     if (selectedVehicle === 'car') {
-      if (durationInHours < 1) {
+      if (durationInHours <= 1) {
         calculatedCost = 20; // Minimum cost for cars
-      } else if (durationInHours >= 1 && durationInHours < 2) {
+      } else if (durationInHours <= 2) {
         calculatedCost = 30; // Cost for 1-2 hours
-      } else if (durationInHours >= 2 && durationInHours < 3) {
+      } else if (durationInHours <= 3) {
         calculatedCost = 50; // Cost for 2-3 hours
       } else {
         calculatedCost = 70; // Cost for more than 3 hours
       }
     } else if (selectedVehicle === 'motorcycle') {
-      if (durationInHours < 1) {
+      if (durationInHours <= 1) {
         calculatedCost = 10; // Minimum cost for motorcycles
-      } else if (durationInHours >= 1 && durationInHours < 2) {
+      } else if (durationInHours <= 2) {
         calculatedCost = 20; // Cost for 1-2 hours
-      } else if (durationInHours >= 2 && durationInHours < 3) {
+      } else if (durationInHours <= 3) {
         calculatedCost = 30; // Cost for 2-3 hours
       } else {
         calculatedCost = 30; // Cost for more than 3 hours (same as 2-3 hours for motorcycles)
       }
     }
-  
-    setCost(calculatedCost); // Set the calculated cost
+
+    setCost(`Rs. ${calculatedCost}`); // Set the calculated cost
   };
-  
+
   const handleLocationChange = (event) => {
     setSelectedLocation(event.target.value);
     setSelectedArea('');
@@ -70,25 +101,119 @@ const ParkingServicePage = () => {
 
   const handleDateChange = (e) => {
     setDate(e.target.value);
-    calculateCost(); // Recalculate cost whenever the date changes
   };
 
   const handleTimeChange = (e) => {
     const { name, value } = e.target;
-    setTime((prev) => {
-      const newTime = { ...prev, [name]: value };
-      calculateCost(); // Recalculate cost whenever time changes
-      return newTime;
-    });
+    setTime((prev) => ({ ...prev, [name]: value }));
   };
 
+  const suggestedTimeSlots = [
+    { start: "09:00", end: "17:00" },
+    { start: "10:00", end: "13:00" },
+  ];
+
+  const handleSuggestedTimeSelect = (start, end) => {
+    setTime({ start, end });
+  };
+
+
   const handleSubmit = () => {
-    if (selectedLocation && selectedArea && selectedVehicle && date && time.start && time.end) {
-      window.location.href = 'https://razorpay.me/@parkmet'; // Replace with your actual Razorpay payment link
+    if (selectedLocation && selectedArea && selectedVehicle && date && time.start && time.end && typeof cost === 'string') {
+      const numericalCost = parseInt(cost.replace('Rs. ', ''), 10);
+  
+      if (isNaN(numericalCost) || numericalCost <= 0) {
+        alert('Invalid cost. Please check your selections.');
+        return;
+      }
+  
+      const user = JSON.parse(localStorage.getItem("userData")); // Fetch user details from localStorage
+
+const razorpayKey = "rzp_test_gLSezl1mumwdVs"; // Replace with your Razorpay test key
+
+const options = {
+  key: razorpayKey,
+  amount: numericalCost * 100,
+  currency: 'INR',
+  name: 'ParkMate',
+  description: 'Parking Service Payment',
+  handler: function (response) {
+    // Call function to save booking in the backend
+    saveBookingToBackend(response.razorpay_payment_id);
+  },
+  prefill: {
+    name: user?.name || "Guest",  // Fetch user's name dynamically
+    email: user?.email || "guest@example.com",  // Fetch user's email dynamically
+    contact: user?.mobile || "0000000000",  // Fetch user mobile dynamically (if available)
+  },
+  notes: {
+    address: "Customer's address",
+  },
+  theme: {
+    color: "#28a745",
+  },
+};
+
+const razorpay = new window.Razorpay(options);
+razorpay.open();
+
     } else {
-      alert('Please complete all steps before proceeding to payment.');
+      alert('Please complete all steps correctly before proceeding to payment.');
     }
   };
+  
+  const saveBookingToBackend = async (paymentId) => {
+    try {
+      const bookingData = {
+        userId: localStorage.getItem("userId"),
+        location: selectedLocation,
+        parkingArea: selectedArea,
+        vehicleType: selectedVehicle,
+        date: date,
+        time: `${time.start} - ${time.end}`,
+        cost: parseInt(cost.replace("Rs. ", ""), 10),
+        paymentId: paymentId
+      };
+  
+      console.log("📢 Sending Booking Data:", bookingData);
+  
+      const response = await fetch("http://localhost:5000/api/orders", {  // ✅ Ensure API path is correct
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
+      });
+  
+      const result = await response.json();
+      console.log("📢 API Response:", result);
+  
+      if (response.ok) {
+        Swal.fire({
+          title: "Payment & Booking Successful!",
+          text: "Your parking has been booked successfully.",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(() => {
+          navigate("/Orders");
+        });
+      } else {
+        console.error("❌ API Error:", result);
+        Swal.fire("Error!", result.message || "Failed to save booking details!", "error");
+      }
+    } catch (error) {
+      console.error("🔥 Fetch Error:", error);
+      Swal.fire("Error!", "Failed to save booking details!", "error");
+    }
+  };
+  
+
+ 
+  const getDateOptions = () => {
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    return [today]; // Return only today's date in an array
+  };
+  
 
   return (
     <div className="container text-center mt-5">
@@ -156,6 +281,10 @@ const ParkingServicePage = () => {
           color: #28a745;
           font-weight: bold;
         }
+
+        .cost-display.error {
+          color: red;
+        }
       `}</style>
 
       {/* Progress Bar */}
@@ -165,7 +294,7 @@ const ParkingServicePage = () => {
 
       <h2>WE HAVE A SPOT FOR YOU.</h2>
 
-      {cost !== null && <div className="cost-display">Cost: Rs. {cost}</div>}
+      {cost && <div className={`cost-display ${cost === 'Invalid time selection' ? 'error' : ''}`}>{cost}</div>}
 
       <div className="row mt-4">
         <div className="col">
@@ -229,6 +358,8 @@ const ParkingServicePage = () => {
             </div>
           </div>
         )}
+
+        
         {selectedVehicle && (
           <div className="col">
             <div className="parking-step">
@@ -236,47 +367,62 @@ const ParkingServicePage = () => {
                 <img src="date and time.png" alt="Date and Time Icon" />
               </div>
               <p>Select Date And Time</p>
-              <input
-                type="date"
+              <select
                 className="form-control"
                 onChange={handleDateChange}
                 value={date}
-              />
+              >
+                <option value="">Select Date</option>
+                {getDateOptions().map((optionDate) => (
+                  <option key={optionDate} value={optionDate}>
+                    {optionDate}
+                  </option>
+                ))}
+              </select>
               <div className="d-flex justify-content-between">
-                <input
-                  type="time"
-                  className="form-control me-2"
-                  placeholder="Start Time"
-                  onChange={handleTimeChange}
-                  value={time.start}
-                  name="start"
-                />
-                <input
-                  type="time"
-                  className="form-control"
-                  placeholder="End Time"
-                  onChange={handleTimeChange}
-                  value={time.end}
-                  name="end"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-        {date && time.start && time.end && (
-          <div className="col">
-            <div className="parking-step">
-              <div className="parking-circle">
-                <img src="payment.png" alt="Payment Icon" />
-              </div>
-              <p>Payment</p>
-              <button className="btn btn-success" onClick={handleSubmit}>
-                Proceed to Payment
-              </button>
+  <input
+    type="time"
+    className="form-control"
+    name="start"
+    value={time.start}
+    onChange={handleTimeChange}
+  />
+  <input
+    type="time"
+    className="form-control"
+    name="end"
+    value={time.end}
+    onChange={handleTimeChange}
+  />
+</div>
+
+{/* Suggested Time Slots */}
+<div className="mt-2">
+  <p className="mb-1">Suggested Timings:</p>
+  <div className="d-flex flex-wrap">
+    {suggestedTimeSlots.map((slot, index) => (
+      <button
+        key={index}
+        className="btn btn-outline-success m-1"
+        onClick={() => handleSuggestedTimeSelect(slot.start, slot.end)}
+      >
+        {slot.start} - {slot.end}
+      </button>
+    ))}
+  </div>
+</div>
+
+              
             </div>
           </div>
         )}
       </div>
+
+      {cost && (
+        <button onClick={handleSubmit} className="btn btn-success">
+          Proceed to Payment
+        </button>
+      )}
     </div>
   );
 };
