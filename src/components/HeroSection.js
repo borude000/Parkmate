@@ -1,40 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook for navigation
-import Register from './Register'; // Import your Register component
+import { useNavigate } from 'react-router-dom'; 
+import Register from './Register'; 
 
 const HeroSection = () => {
-  const [showModal, setShowModal] = useState(false); // State to control modal visibility
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const [showModal, setShowModal] = useState(false); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const navigate = useNavigate(); 
 
   useEffect(() => {
-    // Check localStorage to see if the modal was previously shown
     const isModalShown = localStorage.getItem('isModalShown');
-    const token = localStorage.getItem('authToken'); // Assuming you store the token in localStorage
+    const token = localStorage.getItem('authToken'); 
     
     if (!isModalShown) {
-      setShowModal(true); // Show modal if it hasn't been shown before
+      setShowModal(true);
     }
 
-    // Set the login state based on whether the user is logged in
     if (token) {
       setIsLoggedIn(true);
     }
+
+    // ✅ Load chatbot script dynamically
+    const script = document.createElement('script');
+    script.src = "https://www.chatbase.co/embed.min.js";
+    script.id = "qk-47xMdjyvKfLk2znPIg";
+    script.domain = "www.chatbase.co";
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script); // Cleanup when component unmounts
+    };
   }, []);
 
-  // Function to close the modal
   const handleCloseModal = () => {
     setShowModal(false);
-    // Set a flag in localStorage to prevent showing the modal again
     localStorage.setItem('isModalShown', 'true');
   };
 
-  // Function to handle "Start Parking" button click
   const handleStartParking = () => {
     if (isLoggedIn) {
-      navigate('/Parking'); // Navigate to the parking page if logged in
+      navigate('/Parking');
     } else {
-      navigate('/login'); // Navigate to the login page if not logged in
+      navigate('/login');
     }
   };
 
@@ -64,10 +70,7 @@ const HeroSection = () => {
         <h1 style={{ fontSize: '48px', fontWeight: 'bold' }}>Park. Pay. Go.</h1>
         <p style={{ fontSize: '18px', margin: '1rem 0' }}>When you're on the go, the free ParkMate app makes it easy to find and pay for parking without running back to feed the meter.</p>
         <p style={{ fontSize: '18px', margin: '1rem 0' }}>And for added convenience, you can reserve spots ahead of time.</p>
-        <div className="search-bar input-group mb-5" style={{ maxWidth: '400px', margin: '2rem auto 0 auto' }}>
-        </div>
 
-        {/* Conditionally render login and register buttons based on login status */}
         <div className="mt-4">
           <button className="btn btn-success download-btn" onClick={handleStartParking}>
             Start Parking
@@ -83,7 +86,6 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Modal Popup for Registration */}
       {showModal && (
         <div className="modal" style={{
           position: 'fixed',
@@ -91,7 +93,7 @@ const HeroSection = () => {
           left: '0',
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker overlay
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -100,12 +102,12 @@ const HeroSection = () => {
         }}>
           <div className="modal-content" style={{
             backgroundColor: 'white',
-            padding: '1rem', // Reduced padding
+            padding: '1rem',
             borderRadius: '9px',
             maxHeight: '600px',
-            maxWidth: '400px', // Smaller width
-            width: '90%', // Responsive width
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' // Optional shadow for effect
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
           }}>
             <span onClick={handleCloseModal} style={{
               position: 'absolute',
@@ -116,7 +118,6 @@ const HeroSection = () => {
               color: '#000'
             }}>&times;</span>
             
-            {/* Render the Register component inside the modal */}
             <Register />
           </div>
         </div>
