@@ -20,6 +20,7 @@ const Orders = () => {
   const [slotStatus, setSlotStatus] = useState({}); // Track slot status (red/green)
   const [slotEndTimes, setSlotEndTimes] = useState({}); // Track booking end times for slots
   const [isSlotSelected, setIsSlotSelected] = useState(false); // Track if a slot is selected
+  const [remainingTime, setRemainingTime] = useState(null); // Track remaining time for the slot
 
   // Fetch booked slots from the backend
   useEffect(() => {
@@ -41,12 +42,44 @@ const Orders = () => {
           if (data?.slot) {
             setSelectedSlot(data.slot);
             setIsSlotSelected(true); // A slot is already selected
-            const endTime = calculateEndTime(data.time);
-            setSlotEndTimes((prev) => ({ ...prev, [data.slot]: endTime }));
-            setSlotStatus((prev) => ({ ...prev, [data.slot]: 'red' })); // Set slot to red initially
+
+            // Extract start and end times from the booking
+            const [startTime, endTime] = data.time.split(" - ");
+            const [startHour, startMinute] = startTime.split(":").map(Number);
+            const [endHour, endMinute] = endTime.split(":").map(Number);
+
+            // Calculate the start and end times of the booking
+            const bookingStartTime = new Date(data.date);
+            bookingStartTime.setHours(startHour, startMinute, 0);
+
+            const bookingEndTime = new Date(data.date);
+            bookingEndTime.setHours(endHour, endMinute, 0);
+
+            // Start countdown timer
+            const interval = setInterval(() => {
+              const now = new Date();
+
+              if (now < bookingStartTime) {
+                // If the current time is before the booking start time
+                setRemainingTime("Advance Booking");
+              } else if (now >= bookingStartTime && now <= bookingEndTime) {
+                // If the current time is within the booking duration
+                const diff = bookingEndTime - now; // Difference in milliseconds
+                const hours = Math.floor(diff / (1000 * 60 * 60)); // Convert to hours
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)); // Remaining minutes
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000); // Remaining seconds
+                setRemainingTime(`${hours} hours ${minutes} minutes ${seconds} seconds`);
+              } else {
+                // If the booking time has expired
+                clearInterval(interval); // Stop the timer
+                setRemainingTime("Time Expired");
+              }
+            }, 1000);
+
+            return () => clearInterval(interval); // Cleanup interval on unmount
           }
         })
-        .catch((err) => console.error('Error fetching latest order:', err));
+        .catch((err) => console.error("Error fetching latest order:", err));
     }
   }, [userId]);
 
@@ -160,29 +193,17 @@ const Orders = () => {
             <p><FaClock className="icon" /> <strong>Time:</strong> {orderDetails.time}</p>
             <p><FaMoneyBill className="icon" /> <strong>Amount Paid:</strong> Rs. {orderDetails.cost}</p>
 
-            {selectedSlot && (
-              <p><strong>Selected Slot:</strong> {selectedSlot}</p>
+            {/* Display the selected slot */}
+            {orderDetails.slot && (
+              <p>
+                <FaParking className="icon" /> <strong>Selected Slot:</strong> {orderDetails.slot}
+                {remainingTime && (
+                  <span className="text-muted ms-2">
+                    ⏳ {remainingTime}
+                  </span>
+                )}
+              </p>
             )}
-
-<div className="slot-container">
-  {slots.map((slot) => (
-    <button
-      key={slot}
-      className={`slot-btn ${
-        bookedSlots.includes(slot)
-          ? 'booked'
-          : selectedSlot === slot
-          ? slotStatus[slot] || 'red'
-          : ''
-      }`}
-      onClick={() => handleSlotSelect(slot)}
-      disabled={bookedSlots.includes(slot) || isSlotSelected} // Disable if booked
-    >
-      {slot}
-    </button>
-  ))}
-</div>
-
 
             {parkingLocations[orderDetails.parkingArea] && (
               <button className="btn btn-success mt-3 me-2" onClick={handleNavigate}>

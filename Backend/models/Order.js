@@ -8,6 +8,7 @@ const orderSchema = new mongoose.Schema({
   date: { type: String, required: true },
   time: { type: String, required: true },
   cost: { type: Number, required: true },
+  slot: { type: String, required: false }, // Add slot field to store selected slot
   paymentStatus: { type: String, enum: ["Pending", "Completed"], default: "Pending" }, // Track payment
 }, { timestamps: true });
 

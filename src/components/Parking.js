@@ -12,8 +12,18 @@ const ParkingServicePage = () => {
   const [time, setTime] = useState({ start: '', end: '' });
   const [step, setStep] = useState(1);
   const [cost, setCost] = useState(null);
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [selectedSlot, setSelectedSlot] = useState('');
+  const [availableSlots, setAvailableSlots] = useState(["A1", "A2", "A3", "B1", "B2"]); // Example slots
+  const [selectedSlot, setSelectedSlot] = useState(""); // Track selected slot
+  const [remainingTime, setRemainingTime] = useState(null); // Track remaining time for the selected slot
+  const [bookingStartTime, setBookingStartTime] = useState(null); // Track booking start time
+  const [bookingEndTime, setBookingEndTime] = useState(null); // Track booking end time
+  const [slotStatus, setSlotStatus] = useState({
+    A1: { status: "free", remainingTime: null },
+    A2: { status: "free", remainingTime: null },
+    A3: { status: "free", remainingTime: null },
+    B1: { status: "free", remainingTime: null },
+    B2: { status: "free", remainingTime: null },
+  }); // Track the status and countdown for each slot
   const navigate = useNavigate();
 
 
@@ -38,6 +48,66 @@ const ParkingServicePage = () => {
   useEffect(() => {
     calculateCost(); // Recalculate cost whenever time or date changes
   }, [date, time, selectedVehicle]);
+
+  useEffect(() => {
+    if (bookingStartTime && bookingEndTime && selectedSlot) {
+      // Mark the selected slot as occupied
+      setSlotStatus((prevStatus) => ({
+        ...prevStatus,
+        [selectedSlot]: { ...prevStatus[selectedSlot], status: "occupied" },
+      }));
+
+      const interval = setInterval(() => {
+        const now = new Date();
+
+        if (now < bookingStartTime) {
+          setSlotStatus((prevStatus) => ({
+            ...prevStatus,
+            [selectedSlot]: { ...prevStatus[selectedSlot], remainingTime: "Advance Booking" },
+          }));
+        } else if (now >= bookingStartTime && now <= bookingEndTime) {
+          const diff = bookingEndTime - now;
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          setSlotStatus((prevStatus) => ({
+            ...prevStatus,
+            [selectedSlot]: {
+              ...prevStatus[selectedSlot],
+              remainingTime: `${hours} hours ${minutes} minutes ${seconds} seconds`,
+            },
+          }));
+        } else {
+          clearInterval(interval);
+
+          // Free the slot when the countdown ends
+          setSlotStatus((prevStatus) => ({
+            ...prevStatus,
+            [selectedSlot]: { status: "free", remainingTime: null },
+          }));
+          setSelectedSlot(""); // Clear the selected slot
+          setBookingStartTime(null);
+          setBookingEndTime(null);
+          localStorage.removeItem("activeBooking"); // Clear booking details
+        }
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [bookingStartTime, bookingEndTime, selectedSlot]);
+
+  useEffect(() => {
+    const activeBooking = JSON.parse(localStorage.getItem("activeBooking"));
+    if (activeBooking) {
+      const { slot, startTime, endTime } = activeBooking;
+
+      setSelectedSlot(slot);
+      setBookingStartTime(new Date(startTime));
+      setBookingEndTime(new Date(endTime));
+    }
+  }, []);
+
+  console.log("Remaining Time:", remainingTime); // Debugging log
 
   const calculateCost = () => {
     if (!time.start || !time.end || !date) {
@@ -117,6 +187,13 @@ const ParkingServicePage = () => {
     setTime({ start, end });
   };
 
+  // Function to handle slot selection
+  const handleSlotSelect = (slot) => {
+    if (slotStatus[slot].status === "free") {
+      setSelectedSlot(slot);
+      console.log("Selected Slot:", slot); // Debugging log
+    }
+  };
 
   const handleSubmit = () => {
     if (selectedLocation && selectedArea && selectedVehicle && date && time.start && time.end && typeof cost === 'string') {
@@ -172,12 +249,13 @@ razorpay.open();
         date: date,
         time: `${time.start} - ${time.end}`,
         cost: parseInt(cost.replace("Rs. ", ""), 10),
-        paymentId: paymentId
+        slot: selectedSlot,
+        paymentId: paymentId,
       };
   
       console.log("📢 Sending Booking Data:", bookingData);
   
-      const response = await fetch("http://localhost:5000/api/orders", {  // ✅ Ensure API path is correct
+      const response = await fetch("http://localhost:5000/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -189,6 +267,29 @@ razorpay.open();
       console.log("📢 API Response:", result);
   
       if (response.ok) {
+        // Calculate and set booking times
+        const [startHour, startMinute] = time.start.split(":").map(Number);
+        const [endHour, endMinute] = time.end.split(":").map(Number);
+  
+        const start = new Date(date);
+        start.setHours(startHour, startMinute, 0);
+  
+        const end = new Date(date);
+        end.setHours(endHour, endMinute, 0);
+  
+        // Save booking details to localStorage
+        localStorage.setItem(
+          "activeBooking",
+          JSON.stringify({
+            slot: selectedSlot,
+            startTime: start.toISOString(),
+            endTime: end.toISOString(),
+          })
+        );
+  
+        setBookingStartTime(start);
+        setBookingEndTime(end);
+  
         Swal.fire({
           title: "Payment & Booking Successful!",
           text: "Your parking has been booked successfully.",
@@ -284,6 +385,89 @@ razorpay.open();
 
         .cost-display.error {
           color: red;
+        }
+
+        .slot-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Responsive grid */
+          gap: 15px;
+          margin-top: 20px;
+          justify-content: center;
+        }
+
+        .slot-btn {
+          width: 170px;
+          height: 80px;
+          font-size: 12px;
+          font-weight: bold;
+          border-radius: 10px;
+          border: 2px solid #28a745;
+          cursor: pointer;
+          background-color: #f8f9fa;
+          color: #28a745;
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          text-align: center;
+        }
+
+        .slot-btn:hover {
+          background-color: #d4f8d4;
+          transform: scale(1.05);
+        }
+
+        .slot-btn.selected {
+          background-color: #ffec99;
+          border-color: #ffc107;
+          color: #212529;
+        }
+
+        .slot-btn.booked {
+          background-color: #ff6961;
+          border-color: #dc3545;
+          color: white;
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+
+        .slot-btn .timer-text {
+          font-size: 9px;
+          color: #6c757d;
+          margin-top: 5px;
+          line-height: 1.2;
+          word-wrap: break-word;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        /* Media Query for Mobile View */
+        @media (max-width: 768px) {
+          .slot-container {
+            grid-template-columns: 1fr; /* Make slots stack vertically */
+          }
+
+          .slot-btn {
+            width: 100%; /* Full width for mobile */
+            height: auto; /* Adjust height automatically */
+            font-size: 14px; /* Slightly larger font size for better readability */
+          }
+
+          .parking-step {
+            margin-bottom: 20px; /* Add spacing between steps */
+          }
+
+          .form-control {
+            width: 100%; /* Full width for inputs */
+          }
+
+          .progress-bar-container {
+            height: 8px; /* Slightly smaller progress bar for mobile */
+          }
         }
       `}</style>
 
@@ -418,8 +602,33 @@ razorpay.open();
         )}
       </div>
 
-      {cost && (
-        <button onClick={handleSubmit} className="btn btn-success">
+      {/* Slot Selection */}
+      {time.start && time.end && (
+        <div className="slot-container">
+          <h4>Select a Slot</h4>
+          {availableSlots.map((slot) => (
+            <button
+              key={slot}
+              className={`slot-btn ${
+                selectedSlot === slot ? "selected" : slotStatus[slot].status === "occupied" ? "booked" : ""
+              }`}
+              onClick={() => handleSlotSelect(slot)}
+              disabled={slotStatus[slot].status === "occupied"} // Disable only occupied slots
+            >
+              <span>{slot}</span>
+              {slotStatus[slot].remainingTime && (
+                <span className="timer-text">
+                  ⏳ {slotStatus[slot].remainingTime}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Proceed to Payment */}
+      {selectedSlot && cost && (
+        <button onClick={handleSubmit} className="btn btn-success mt-4">
           Proceed to Payment
         </button>
       )}
