@@ -78,7 +78,7 @@ const HeroSection = () => {
         </div>
         
         <div className="mt-4 download-app-container">
-          <a href="/parkmate-app.apk" download>
+          <a href="/app-debug.apk" download>
             <button className="btn btn-success download-btn">
               Get the Mobile App
             </button>
