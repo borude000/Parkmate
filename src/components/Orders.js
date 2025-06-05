@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaCar, FaClock, FaMoneyBill, FaMapMarkerAlt, FaParking, FaPrint } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';import { FaCalendarAlt, FaCar, FaClock, FaMoneyBill, FaMapMarkerAlt, FaParking, FaPrint, FaIdCard } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Orders.css';
+import { QRCodeSVG } from "qrcode.react";
 
 const parkingLocations = {
   "Samarth Parking 1": { latitude: 19.128691564262418, longitude: 74.1897257922209 },
@@ -183,37 +183,59 @@ const Orders = () => {
 
       {orderDetails ? (
         <div className="card order-card shadow mt-4" id="printableArea">
-          <div className="card-body">
-            <h5 className="card-title text-success">✅ Active Booking</h5>
-            <p><strong>Order ID:</strong> #{orderDetails._id}</p>
-            <p><FaMapMarkerAlt className="icon" /> <strong>Location:</strong> {orderDetails.location}</p>
-            <p><FaParking className="icon" /> <strong>Parking Area:</strong> {orderDetails.parkingArea}</p>
-            <p><FaCar className="icon" /> <strong>Vehicle Type:</strong> {orderDetails.vehicleType}</p>
-            <p><FaCalendarAlt className="icon" /> <strong>Date:</strong> {orderDetails.date}</p>
-            <p><FaClock className="icon" /> <strong>Time:</strong> {orderDetails.time}</p>
-            <p><FaMoneyBill className="icon" /> <strong>Amount Paid:</strong> Rs. {orderDetails.cost}</p>
+          <div className="card-body d-flex justify-content-between align-items-start">
+            <div>
+              <h5 className="card-title text-success">✅ Active Booking</h5>
+              <p><strong>Order ID:</strong> #{orderDetails._id}</p>
+              <p><FaMapMarkerAlt className="icon" /> <strong>Location:</strong> {orderDetails.location}</p>
+              <p><FaParking className="icon" /> <strong>Parking Area:</strong> {orderDetails.parkingArea}</p>
+              <p><FaCar className="icon" /> <strong>Vehicle Type:</strong> {orderDetails.vehicleType}</p>
+              <p><FaIdCard className="icon" /> <strong>Vehicle Number:</strong> {orderDetails.vehicleNumber}</p>
+              <p><FaCalendarAlt className="icon" /> <strong>Date:</strong> {orderDetails.date}</p>
+              <p><FaClock className="icon" /> <strong>Time:</strong> {orderDetails.time}</p>
+              <p><FaMoneyBill className="icon" /> <strong>Amount Paid:</strong> Rs. {orderDetails.cost}</p>
 
-            {/* Display the selected slot */}
-            {orderDetails.slot && (
-              <p>
-                <FaParking className="icon" /> <strong>Selected Slot:</strong> {orderDetails.slot}
-                {remainingTime && (
-                  <span className="text-muted ms-2">
-                    ⏳ {remainingTime}
-                  </span>
-                )}
-              </p>
-            )}
+              {/* Display the selected slot */}
+              {orderDetails.slot && (
+                <p>
+                  <FaParking className="icon" /> <strong>Selected Slot:</strong> {orderDetails.slot}
+                  {remainingTime && (
+                    <span className="text-muted ms-2">
+                      ⏳ {remainingTime}
+                    </span>
+                  )}
+                </p>
+              )}
 
-            {parkingLocations[orderDetails.parkingArea] && (
-              <button className="btn btn-success mt-3 me-2" onClick={handleNavigate}>
-                Navigate to {orderDetails.parkingArea}
+              {parkingLocations[orderDetails.parkingArea] && (
+                <button className="btn btn-success mt-3 me-2" onClick={handleNavigate}>
+                  Navigate to {orderDetails.parkingArea}
+                </button>
+              )}
+
+              <button className="btn btn-light mt-3" onClick={handlePrint}>
+                <FaPrint /> Print
               </button>
-            )}
-
-            <button className="btn btn-light mt-3" onClick={handlePrint}>
-              <FaPrint /> Print
-            </button>
+            </div>
+            <div>
+              <QRCodeSVG
+                value={
+                  `Order ID: ${orderDetails._id}\n` +
+                  `Location: ${orderDetails.location}\n` +
+                  `Parking Area: ${orderDetails.parkingArea}\n` +
+                  `Vehicle Type: ${orderDetails.vehicleType}\n` +
+                  `Vehicle Number: ${orderDetails.vehicleNumber}\n` +
+                  `Date: ${orderDetails.date}\n` +
+                  `Time: ${orderDetails.time}\n` +
+                  `Amount Paid: Rs. ${orderDetails.cost}\n` +
+                  (orderDetails.slot ? `Slot: ${orderDetails.slot}\n` : "")
+                }
+                size={90}
+                level="H"
+                includeMargin={true}
+              />
+              <div style={{fontSize: "12px", textAlign: "center"}}>Scan for details</div>
+            </div>
           </div>
         </div>
       ) : (
@@ -239,6 +261,8 @@ const Orders = () => {
                     <p><FaMapMarkerAlt className="icon" /> <strong>Location:</strong> {order.location}</p>
                     <p><FaParking className="icon" /> <strong>Parking Area:</strong> {order.parkingArea}</p>
                     <p><FaCar className="icon" /> <strong>Vehicle Type:</strong> {order.vehicleType}</p>
+                    {/* Vehicle Number below Vehicle Type */}
+                    <p><FaIdCard className="icon" /> <strong>Vehicle Number:</strong> {order.vehicleNumber}</p>
                     <p><FaClock className="icon" /> <strong>Time:</strong> {order.time}</p>
                     <p><FaMoneyBill className="icon" /> <strong>Amount Paid:</strong> Rs. {order.cost}</p>
                   </div>

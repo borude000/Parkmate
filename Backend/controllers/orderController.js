@@ -4,10 +4,10 @@ export const saveBooking = async (req, res) => {
   try {
     console.log("🔹 Received Booking Data:", req.body); // ✅ Debugging log
 
-    const { userId, location, parkingArea, vehicleType, date, time, cost, slot } = req.body;
+    const { userId, location, parkingArea, vehicleType, vehicleNumber, date, time, cost, slot } = req.body;
 
     // Validate required fields
-    if (!userId || !location || !parkingArea || !vehicleType || !date || !time || !cost) {
+    if (!userId || !location || !parkingArea || !vehicleType || !vehicleNumber || !date || !time || !cost) {
       console.error("❌ Missing Required Fields:", req.body);
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
@@ -23,6 +23,7 @@ export const saveBooking = async (req, res) => {
       location, 
       parkingArea, 
       vehicleType, 
+      vehicleNumber,
       date, 
       time, 
       cost, 

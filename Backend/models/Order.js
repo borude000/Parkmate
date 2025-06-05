@@ -5,6 +5,7 @@ const orderSchema = new mongoose.Schema({
   location: { type: String, required: true },
   parkingArea: { type: String, required: true },
   vehicleType: { type: String, required: true },
+  vehicleNumber: { type: String, required: true },
   date: { type: String, required: true },
   time: { type: String, required: true },
   cost: { type: Number, required: true },

@@ -24,6 +24,7 @@ const ParkingServicePage = () => {
     B1: { status: "free", remainingTime: null },
     B2: { status: "free", remainingTime: null },
   }); // Track the status and countdown for each slot
+  const [vehicleNumber, setVehicleNumber] = useState('');
   const navigate = useNavigate();
 
 
@@ -246,6 +247,7 @@ razorpay.open();
         location: selectedLocation,
         parkingArea: selectedArea,
         vehicleType: selectedVehicle,
+        vehicleNumber: vehicleNumber, // <-- Add this line
         date: date,
         time: `${time.start} - ${time.end}`,
         cost: parseInt(cost.replace("Rs. ", ""), 10),
@@ -548,6 +550,31 @@ razorpay.open();
           <div className="col">
             <div className="parking-step">
               <div className="parking-circle">
+                <img src="number-plate.png" alt="Vehicle Number Icon" />
+              </div>
+              <p>Enter Vehicle Number</p>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="e.g. MH-02-VD-2636"
+                value={vehicleNumber}
+                onChange={(e) => {
+                  let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                  // Format: XX-00-XX-0000
+                  if (value.length > 2) value = value.slice(0,2) + '-' + value.slice(2);
+                  if (value.length > 5) value = value.slice(0,5) + '-' + value.slice(5);
+                  if (value.length > 8) value = value.slice(0,8) + '-' + value.slice(8,12);
+                  setVehicleNumber(value.slice(0,13));
+                }}
+                maxLength={13}
+              />
+            </div>
+          </div>
+        )}
+        {selectedVehicle && vehicleNumber && (
+          <div className="col">
+            <div className="parking-step">
+              <div className="parking-circle">
                 <img src="date and time.png" alt="Date and Time Icon" />
               </div>
               <p>Select Date And Time</p>
@@ -564,39 +591,36 @@ razorpay.open();
                 ))}
               </select>
               <div className="d-flex justify-content-between">
-  <input
-    type="time"
-    className="form-control"
-    name="start"
-    value={time.start}
-    onChange={handleTimeChange}
-  />
-  <input
-    type="time"
-    className="form-control"
-    name="end"
-    value={time.end}
-    onChange={handleTimeChange}
-  />
-</div>
-
-{/* Suggested Time Slots */}
-<div className="mt-2">
-  <p className="mb-1">Suggested Timings:</p>
-  <div className="d-flex flex-wrap">
-    {suggestedTimeSlots.map((slot, index) => (
-      <button
-        key={index}
-        className="btn btn-outline-success m-1"
-        onClick={() => handleSuggestedTimeSelect(slot.start, slot.end)}
-      >
-        {slot.start} - {slot.end}
-      </button>
-    ))}
-  </div>
-</div>
-
-              
+                <input
+                  type="time"
+                  className="form-control"
+                  name="start"
+                  value={time.start}
+                  onChange={handleTimeChange}
+                />
+                <input
+                  type="time"
+                  className="form-control"
+                  name="end"
+                  value={time.end}
+                  onChange={handleTimeChange}
+                />
+              </div>
+              {/* Suggested Time Slots */}
+              <div className="mt-2">
+                <p className="mb-1">Suggested Timings:</p>
+                <div className="d-flex flex-wrap">
+                  {suggestedTimeSlots.map((slot, index) => (
+                    <button
+                      key={index}
+                      className="btn btn-outline-success m-1"
+                      onClick={() => handleSuggestedTimeSelect(slot.start, slot.end)}
+                    >
+                      {slot.start} - {slot.end}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -635,5 +659,13 @@ razorpay.open();
     </div>
   );
 };
+
+const stateCodes = [
+  { state: "Himachal Pradesh", code: "HP" },
+  { state: "Jharkhand", code: "JH" },
+  { state: "Kerala", code: "KL" },
+  { state: "Maharashtra", code: "MH" },
+  // Add more states as needed
+];
 
 export default ParkingServicePage;
