@@ -17,7 +17,7 @@ const Register = () => {
 
     try {
       // Axios POST request to your backend API
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post('https://parkmate-backend-1qby.onrender.com/api/auth/register', {
         name,
         email,
         password,
