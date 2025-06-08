@@ -24,7 +24,7 @@ const Orders = () => {
 
   // Fetch booked slots from the backend
   useEffect(() => {
-    fetch(`http://localhost:5000/api/slots/booked`)
+    fetch(`https://parkmate-backend-1qby.onrender.com/api/slots/booked`)
       .then((res) => res.json())
       .then((data) => {
         setBookedSlots(data.bookedSlots);
@@ -35,7 +35,7 @@ const Orders = () => {
   // Fetch latest order details for the user
   useEffect(() => {
     if (userId) {
-      fetch(`http://localhost:5000/api/bookings/latest/${userId}`)
+      fetch(`https://parkmate-backend-1qby.onrender.com/api/bookings/latest/${userId}`)
         .then((res) => res.json())
         .then((data) => {
           setOrderDetails(data);
@@ -86,7 +86,7 @@ const Orders = () => {
   // Fetch order history for the user
   useEffect(() => {
     if (userId) {
-      fetch(`http://localhost:5000/api/bookings/history/${userId}`)
+      fetch(`https://parkmate-backend-1qby.onrender.com/api/bookings/history/${userId}`)
         .then((res) => res.json())
         .then((data) => {
           setOrderHistory(data);
@@ -151,7 +151,7 @@ const Orders = () => {
       setSlotStatus((prev) => ({ ...prev, [slot]: 'red' }));
   
       try {
-        const response = await fetch(`http://localhost:5000/api/slot-bookings/assign-slot`, {
+        const response = await fetch(`https://parkmate-backend-1qby.onrender.com/api/slot-bookings/assign-slot`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId, orderId: orderDetails._id, slot }), // Save slot to order
