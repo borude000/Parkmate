@@ -11,7 +11,7 @@ const Navbar = () => {
     if (token) {
       setIsLoggedIn(true);
       axios
-        .get('http://localhost:5000/api/auth/profile', {
+        .get('https://parkmate-backend-1qby.onrender.com/api/auth/profile', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
